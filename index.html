@@ -173,7 +173,7 @@ function hideTT(){ tt.style('opacity', 0); }
     if(i < points.length-1){
       const seg = segGroup.append('path')
         .attr('d', lineSeg([points[i], points[i+1]]))
-        .attr('stroke-width',2.5)
+        .attr('stroke-width',1.8)
         .attr('marker-end','url(#arrowSmall)')
         .attr('opacity',0);
       seg.transition().delay(i*140).duration(520).attr('opacity',1);
@@ -189,8 +189,8 @@ function hideTT(){ tt.style('opacity', 0); }
 
   // hover interaction: thicken hovered segment
   segGroup.selectAll('path')
-    .on('mouseenter', function(){ d3.select(this).attr('stroke-width',4); })
-    .on('mouseleave', function(){ d3.select(this).attr('stroke-width',2.5); });
+    .on('mouseenter', function(){ d3.select(this).attr('stroke-width',2.8); })
+    .on('mouseleave', function(){ d3.select(this).attr('stroke-width',1.8); });
 })();
 
 // ---------- Chart 5: Math plots (ENHANCED) ----------
