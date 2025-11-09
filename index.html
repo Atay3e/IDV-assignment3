@@ -43,15 +43,15 @@
       <div id="chart-venn"></div>
     </section>
 
-    <!-- Chart 3 – Optimisation route -->
+    <!-- Chart 3 – Optimisation route (segmented arrows) -->
     <section class="chart-card" id="card-route">
-      <div class="chart-title">Chart 3（optimisation route） <span class="meta">交互：hover 加粗 | 动画：路线描边</span></div>
+      <div class="chart-title">Chart 3（optimisation route） <span class="meta">每段线条都有箭头 | 依次淡入 | hover 加粗</span></div>
       <div id="chart-route"></div>
     </section>
 
     <!-- Chart 5 – Math plots (enhanced) -->
     <section class="chart-card" id="card-math">
-      <div class="chart-title">Chart 5（math plots, 增强交互） <span class="meta">左：拖动虚线柱设定目标并双击应用；右：十字线、双探针、阴影差值、点击落点</span></div>
+      <div class="chart-title">Chart 5（math plots, 增强交互） <span class="meta">左：拖-双击目标；右：十字线、双探针、阴影差值、点击落点</span></div>
       <div id="chart-math"></div>
     </section>
 
@@ -128,12 +128,12 @@ function hideTT(){ tt.style('opacity', 0); }
     .transition().delay(600).duration(600).style('opacity',1);
 })();
 
-// ---------- Chart 3: Optimisation route ----------
+// ---------- Chart 3: Optimisation route (segmented with arrow per segment) ----------
 (function route(){
   const W = 480, H = 360, m = {t:16,r:16,b:16,l:16};
   const svg = d3.select('#chart-route').append('svg').attr('viewBox', [0,0,W,H]);
 
-  // grid
+  // grid background
   const grid = svg.append('g').attr('opacity', .6);
   for(let x= m.l; x<=W-m.r; x+=20){
     grid.append('line').attr('x1',x).attr('y1',m.t).attr('x2',x).attr('y2',H-m.b).attr('stroke','#d7d7de');
@@ -142,53 +142,55 @@ function hideTT(){ tt.style('opacity', 0); }
     grid.append('line').attr('x1',m.l).attr('y1',y).attr('x2',W-m.r).attr('y2',y).attr('stroke','#d7d7de');
   }
 
-  // path with arrow marker
+  // small arrow marker
   const defs = svg.append('defs');
   defs.append('marker')
-      .attr('id','arrow')
-      .attr('viewBox','0 0 10 10')
-      .attr('refX',10).attr('refY',5)
-      .attr('markerWidth',6).attr('markerHeight',6)
+      .attr('id','arrowSmall')
+      .attr('viewBox','0 0 6 6')
+      .attr('refX',6).attr('refY',3)
+      .attr('markerWidth',4).attr('markerHeight',4)
       .attr('orient','auto-start-reverse')
-      .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','#3d6eda');
+      .append('path').attr('d','M0,0 L6,3 L0,6 Z').attr('fill','#3d6eda');
 
+  // points (approximate)
   const points = [
-    [80,300],[90,290],[110,280],[120,255],[115,235],[130,230],[150,240],
-    [170,250],[190,235],[220,225],[250,235],[280,230],[310,220],[340,225],[370,235],[400,230]
+    [80,300],[100,280],[120,255],[140,235],[160,230],[180,240],
+    [200,250],[220,235],[250,225],[280,230],[310,220],[340,225],[370,235],[400,230]
   ];
 
-  // covered ribbon shape
+  // background ribbon
   const ribbon = d3.area()
     .x(d=>d[0])
     .y0(d=>d[1]+10)
     .y1(d=>d[1]-10)
     .curve(d3.curveCatmullRom.alpha(0.5));
-
   svg.append('path').attr('d', ribbon(points)).attr('fill','#b5d0f7').attr('opacity',.4);
 
-  const line = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
-  const path = svg.append('path')
-    .attr('d', line(points))
-    .attr('fill','none').attr('stroke','#3d6eda').attr('stroke-width',2.5)
-    .attr('marker-end','url(#arrow)');
+  // segmented path with arrow per segment
+  const lineSeg = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+  const segGroup = svg.append('g').attr('stroke','#3d6eda').attr('fill','none');
+  points.forEach((p,i)=>{
+    if(i < points.length-1){
+      const seg = segGroup.append('path')
+        .attr('d', lineSeg([points[i], points[i+1]]))
+        .attr('stroke-width',2.5)
+        .attr('marker-end','url(#arrowSmall)')
+        .attr('opacity',0);
+      seg.transition().delay(i*140).duration(520).attr('opacity',1);
+    }
+  });
 
-  // draw animation
-  const L = path.node().getTotalLength();
-  path.attr('stroke-dasharray', `${L} ${L}`).attr('stroke-dashoffset', L)
-      .transition().duration(1800).ease(d3.easeCubic).attr('stroke-dashoffset', 0);
+  // start/end markers
+  const start = points[0], end = points[points.length-1];
+  svg.append('rect').attr('x', start[0]-6).attr('y', start[1]-6).attr('width',12).attr('height',12).attr('fill','#4463cc');
+  svg.append('text').attr('x', start[0]+10).attr('y', start[1]-8).text('x').style('font-weight',700);
+  svg.append('rect').attr('x', end[0]-6).attr('y', end[1]-6).attr('width',12).attr('height',12).attr('fill','#b84d4d');
+  svg.append('text').attr('x', end[0]+10).attr('y', end[1]-8).text("x'").style('font-weight',700);
 
-  // start and end squares
-  svg.append('rect').attr('x', 230).attr('y', 205).attr('width',12).attr('height',12).attr('fill','#4463cc');
-  svg.append('text').attr('x', 245).attr('y', 205).text('x').style('font-weight',700);
-  svg.append('rect').attr('x', 390).attr('y', 220).attr('width',12).attr('height',12).attr('fill','#b84d4d');
-  svg.append('text').attr('x', 407).attr('y', 220).text("x'").style('font-weight',700);
-
-  path.on('mouseenter', function(){
-      d3.select(this).attr('stroke-width',4);
-    })
-    .on('mouseleave', function(){
-      d3.select(this).attr('stroke-width',2.5);
-    });
+  // hover interaction: thicken hovered segment
+  segGroup.selectAll('path')
+    .on('mouseenter', function(){ d3.select(this).attr('stroke-width',4); })
+    .on('mouseleave', function(){ d3.select(this).attr('stroke-width',2.5); });
 })();
 
 // ---------- Chart 5: Math plots (ENHANCED) ----------
@@ -200,7 +202,6 @@ function hideTT(){ tt.style('opacity', 0); }
   const left = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
   const wL = (W/2)-m.l-m.r, hL = H - m.t - m.b;
 
-  // axes
   left.append('line').attr('x1',0).attr('y1',hL).attr('x2',wL).attr('y2',hL).attr('stroke','#222');
   left.append('line').attr('x1',0).attr('y1',hL).attr('x2',0).attr('y2',0).attr('stroke','#222');
 
