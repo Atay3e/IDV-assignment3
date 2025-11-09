@@ -1,376 +1,406 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Assignment 3 – D3 Replications (5 charts)</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <style>
-    :root {
-      --bg: #e6efef;
-      --ink: #222;
-      --muted: #888;
-      --panel: #fff;
-    }
-    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Noto Sans CJK SC", "Microsoft Yahei", Arial, sans-serif; background: var(--bg); color: var(--ink); }
-    header { padding: 24px 28px; }
-    h1 { margin: 0 0 6px; font-weight: 700; }
-    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px 48px; }
-    .chart-card { background: var(--panel); border-radius: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.06); padding: 18px 18px 8px; margin: 18px 0 28px; }
-    .chart-title { font-size: 18px; font-weight: 700; margin: 4px 8px 2px; display:flex; align-items:center; gap:8px; }
-    .meta { color: var(--muted); font-size: 12px; margin-left: 8px; }
-    svg { width: 100%; height: auto; display: block; }
-    .axis path, .axis line { stroke: #444; shape-rendering: crispEdges; }
-    .tick text { font-size: 12px; }
-    .tooltip {
-      position: absolute; pointer-events: none; background: rgba(0,0,0,.75); color:#fff; padding:6px 8px;
-      border-radius: 8px; font-size: 12px; transform: translate(-50%, -120%); white-space: nowrap;
-    }
-    .ghost { stroke-dasharray: 6 4; fill-opacity: .08; stroke-opacity: .6; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据可视化作业 · 摘要 + 代码（单页）</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  :root { --bg:#f5f7f9; --ink:#222; --muted:#6a6f76; --panel:#fff; --accent:#2c7be5; }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",Arial,sans-serif;}
+  header{padding:28px 24px 16px;}
+  h1{margin:0 0 8px;font-size:28px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 40px}
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:18px}
+  .card{background:var(--panel);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.06);padding:18px;margin:12px 0}
+  .title{font-weight:800;margin:0 0 6px;font-size:18px}
+  .meta{color:var(--muted);font-size:12px}
+  details{border:1px solid #e6e9ed;border-radius:10px;padding:12px;margin:10px 0;background:#fafbfc}
+  details > summary{cursor:pointer;font-weight:700}
+  pre{background:#0e1116;color:#d8dee9;padding:12px;border-radius:10px;overflow:auto;font-size:12px}
+  code{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+  svg{width:100%;height:auto;display:block}
+  .tooltip{position:absolute;pointer-events:none;background:rgba(0,0,0,.75);color:#fff;padding:6px 8px;border-radius:8px;font-size:12px;transform:translate(-50%,-120%);white-space:nowrap;opacity:0}
+  .ghost{stroke-dasharray:6 4;fill-opacity:.08;stroke-opacity:.6}
+  nav.toc{background:var(--panel);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.06);padding:12px;margin:12px 0}
+  nav.toc a{display:inline-block;margin:6px 10px 0 0;text-decoration:none;color:#0b63ce;background:#e9f2ff;padding:6px 10px;border-radius:999px;font-size:12px}
+  .badge{display:inline-block;background:#eef3f8;color:#415a77;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:6px}
+  .hint{color:#5f6b7a;font-size:12px}
+</style>
 </head>
 <body>
-  <header class="wrap">
-    <h1>D3.js 图表复刻（5/12）</h1>
-    <div class="meta">包含最少 1 个动画和 1 个交互；数值近似即可</div>
-  </header>
+<header class="wrap">
+  <h1>数据可视化作业 · 摘要 + 代码（单页）</h1>
+  <div class="meta">内容包含：与 AI 助手对话摘要、问题与解决方法、中间成果（草图/代码片段），以及 5 张图表的完整 D3 代码。所有内容已整合在本 HTML 单页中。</div>
+</header>
 
-  <main class="wrap">
+<main class="wrap">
+  <nav class="toc">
+    <strong>目录：</strong>
+    <a href="#chart7">Chart 7 – Venn</a>
+    <a href="#chart3">Chart 3 – 路径</a>
+    <a href="#chart5">Chart 5 – 函数+柱</a>
+    <a href="#chart8">Chart 8 – 比较柱</a>
+    <a href="#chart10">Chart 10 – 地图</a>
+  </nav>
 
-    <!-- Chart 7 – Venn -->
-    <section class="chart-card" id="card-venn">
-      <div class="chart-title">Chart 7（Venn） <span class="meta">交互：hover 高亮 | 动画：淡入与半径弹性</span></div>
-      <div id="chart-venn"></div>
-    </section>
+  <!-- Chart 7 -->
+  <section id="chart7" class="grid">
+    <div class="card">
+      <div class="title">Chart 7 – Venn<span class="badge">动画 + 悬停高亮</span></div>
+      <div id="view-venn"></div>
+    </div>
+    <div class="card">
+      <div class="title">摘要（对话 · 问题 · 中间成果）</div>
+      <details open>
+        <summary>与 AI 助手对话摘要</summary>
+        <ul>
+          <li>说明目标：三圆重叠、进入时弹性放大、悬停高亮当前圆、其他圆降透明；添加 “Replace / Delete / Rewrite” 与罗马数字。</li>
+          <li>位置表达：用“左、右上、右下、略重叠、不在一条直线”这种相对描述替代绝对坐标。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>实现中的问题与解决方法</summary>
+        <ul>
+          <li>文本与边界冲突：改为固定近似坐标，优先可读性。</li>
+          <li>动画过弹：将缓动改为 <code>easeElastic.period(0.5)</code>。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>中间成果（代码片段）</summary>
+<pre><code>// 弹性进入
+circles.transition().duration(900)
+  .ease(d3.easeElastic.period(0.5))
+  .attr('r', d =&gt; d.r);</code></pre>
+      </details>
+    </div>
+  </section>
 
-    <!-- Chart 3 – Optimisation route (segmented arrows) -->
-    <section class="chart-card" id="card-route">
-      <div class="chart-title">Chart 3（optimisation route） <span class="meta">每段线条都有箭头 | 依次淡入 | hover 加粗</span></div>
-      <div id="chart-route"></div>
-    </section>
+  <!-- Chart 3 -->
+  <section id="chart3" class="grid">
+    <div class="card">
+      <div class="title">Chart 3 – 优化路径图<span class="badge">分段箭头 + 1.8px / 2.8px hover</span></div>
+      <div id="view-route"></div>
+      <div class="hint">说明：每段末端带箭头；进入时分段依次淡入；起点/终点以小方块标记为 x / x′；下方浅蓝 ribbon。</div>
+    </div>
+    <div class="card">
+      <div class="title">摘要（对话 · 问题 · 中间成果）</div>
+      <details open>
+        <summary>与 AI 助手对话摘要</summary>
+        <ul>
+          <li>从“整条线一个箭头”改为“每两点一段，每段带箭头”。</li>
+          <li>添加浅蓝 ribbon；线宽 1.8px，悬停加粗 2.8px；起止点加方块并标注 x / x′。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>实现中的问题与解决方法</summary>
+        <ul>
+          <li>箭头密集显嘈杂：marker 改小（6×6 viewBox，显示宽高 4）。</li>
+          <li>网格喧宾夺主：降低 ribbon 透明度、提高路径组层级。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>中间成果（代码片段）</summary>
+<pre><code>// 分段绘制 + 每段箭头
+points.forEach((p,i)=&gt;{
+  if(i &lt; points.length-1){
+    segGroup.append('path')
+      .attr('d', lineSeg([points[i], points[i+1]]))
+      .attr('stroke-width',1.8)
+      .attr('marker-end','url(#arrowSmall)')
+      .attr('opacity',0)
+      .transition().delay(i*140).duration(520).attr('opacity',1);
+  }
+});</code></pre>
+      </details>
+    </div>
+  </section>
 
-    <!-- Chart 5 – Math plots (enhanced) -->
-    <section class="chart-card" id="card-math">
-      <div class="chart-title">Chart 5（math plots, 增强交互） <span class="meta">左：拖-双击目标；右：十字线、双探针、阴影差值、点击落点</span></div>
-      <div id="chart-math"></div>
-    </section>
+  <!-- Chart 5 -->
+  <section id="chart5" class="grid">
+    <div class="card">
+      <div class="title">Chart 5 – 数学函数与柱图<span class="badge">拖拽/双击 + 十字线/阴影区/落点</span></div>
+      <div id="view-math"></div>
+    </div>
+    <div class="card">
+      <div class="title">摘要（对话 · 问题 · 中间成果）</div>
+      <details open>
+        <summary>与 AI 助手对话摘要</summary>
+        <ul>
+          <li>左侧柱图：实心柱=当前值，虚线柱=目标值；进入动画。</li>
+          <li>交互：拖动虚线柱设置 target，双击应用到实心柱；tooltip 显示数值。</li>
+          <li>右侧曲线：两条函数（抛物线 + 近直线）；描边动画；移动显示竖线与双探针、差值阴影，点击落点。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>实现中的问题与解决方法</summary>
+        <ul>
+          <li>拖拽越界：对 y 值作 <code>clamp</code> 到 [0,1]。</li>
+          <li>差值阴影不同步：随鼠标 x 重新采样并更新 area。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>中间成果（代码片段）</summary>
+<pre><code>// 拖拽虚线柱设目标 + 双击应用
+const dragGhost = d3.drag().on('drag', (e,d)=&gt;{
+  const y = Math.max(0, Math.min(1, yL.invert(e.y - m.t)));
+  d.target = y;
+  d3.select(e.sourceEvent.target).attr('y', yL(y)).attr('height', hL - yL(y));
+}).on('end', hideTT);</code></pre>
+      </details>
+    </div>
+  </section>
 
-    <!-- Chart 8 – Simple bars -->
-    <section class="chart-card" id="card-bars">
-      <div class="chart-title">Chart 8（simple bars） <span class="meta">交互：hover 高亮 | 动画：柱形增长</span></div>
-      <div id="chart-bars"></div>
-    </section>
+  <!-- Chart 8 -->
+  <section id="chart8" class="grid">
+    <div class="card">
+      <div class="title">Chart 8 – 简单柱状比较图<span class="badge">动画 + Hover + 均匀间距</span></div>
+      <div id="view-bars"></div>
+    </div>
+    <div class="card">
+      <div class="title">摘要（对话 · 问题 · 中间成果）</div>
+      <details open>
+        <summary>与 AI 助手对话摘要</summary>
+        <ul>
+          <li>三组数据：每组实心柱（当前）+ 虚线柱（对照）。</li>
+          <li>进入动画：主柱自底生长；hover 加深并显示 tooltip；数字居中于柱顶。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>实现中的问题与解决方法</summary>
+        <ul>
+          <li>柱宽/间距不均：调 <code>scaleBand().padding()</code> 与子柱偏移比例。</li>
+          <li>标签遮挡：上移并保持文本锚点居中。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>中间成果（代码片段）</summary>
+<pre><code>// 进入动画
+g.selectAll('rect.bar').data(data).enter().append('rect')
+  .attr('y', H-m.b).attr('height',0)
+  .transition().duration(900)
+  .attr('y', d =&gt; y(d.val))
+  .attr('height', d =&gt; H-m.b - y(d.val));</code></pre>
+      </details>
+    </div>
+  </section>
 
-    <!-- Chart 10 – Map -->
-    <section class="chart-card" id="card-map">
-      <div class="chart-title">Chart 10（map） <span class="meta">交互：拖动圆心/滚轮调半径 | 动画：地图淡入</span></div>
-      <div id="chart-map"></div>
-    </section>
+  <!-- Chart 10 -->
+  <section id="chart10" class="grid">
+    <div class="card">
+      <div class="title">Chart 10 – 地图与圆形区域<span class="badge">拖动中心 + 滚轮缩放 + 提示</span></div>
+      <div id="view-map"></div>
+    </div>
+    <div class="card">
+      <div class="title">摘要（对话 · 问题 · 中间成果）</div>
+      <details open>
+        <summary>与 AI 助手对话摘要</summary>
+        <ul>
+          <li>背景为网格 + 浅黄色多边形陆地；红色圆圈以 x 为中心，表示范围。</li>
+          <li>交互：拖动圆心、鼠标滚轮缩放半径；标注 x′ 与 B(x′)；tooltip 显示中心与半径。</li>
+          <li>拓展路线：可用 GeoJSON + d3-geo 做真实地图与地理半径。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>实现中的问题与解决方法</summary>
+        <ul>
+          <li>缩放过度：半径限制在 [30, 220]。</li>
+          <li>标签遮挡：x′ 置于右上偏移，B(x′) 置于左下切点附近。</li>
+        </ul>
+      </details>
+      <details>
+        <summary>中间成果（代码片段）</summary>
+<pre><code>// 滚轮缩放半径（限制范围）
+svg.on('wheel', (e)=&gt;{
+  e.preventDefault();
+  const r = Math.max(30, Math.min(220, (+circle.attr('r')) + (e.deltaY&gt;0? -10: 10)));
+  circle.attr('r', r);
+});</code></pre>
+      </details>
+    </div>
+  </section>
 
-  </main>
-
-  <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+  <div id="tooltip" class="tooltip"></div>
+</main>
 
 <script>
-// ---------- helpers ----------
+// Tooltip helpers
 const tt = d3.select('#tooltip');
-function showTT(html, [x, y]) {
-  tt.style('opacity', 1).html(html).style('left', x + 'px').style('top', y + 'px');
-}
-function hideTT(){ tt.style('opacity', 0); }
+function showTT(html, [x, y]){ tt.style('opacity',1).html(html).style('left',x+'px').style('top',y+'px'); }
+function hideTT(){ tt.style('opacity',0); }
 
-// ---------- Chart 7: Venn ----------
-(function venn() {
-  const W = 640, H = 440;
-  const svg = d3.select('#chart-venn').append('svg')
-    .attr('viewBox', [0,0,W,H])
-    .attr('aria-label','Venn diagram');
-
-  // title labels
-  svg.append('text').attr('x', W*0.58).attr('y', 40).attr('text-anchor','middle')
-     .style('font-weight',700).style('font-size','18px').text('Replace');
+// Chart 7 – Venn
+(function(){
+  const W=640,H=440;
+  const svg=d3.select('#view-venn').append('svg').attr('viewBox',[0,0,W,H]);
+  svg.append('text').attr('x', W*0.58).attr('y', 40).attr('text-anchor','middle').style('font-weight',700).style('font-size','18px').text('Replace');
   svg.append('text').attr('x', 110).attr('y', H-28).style('font-weight',600).text('Delete');
   svg.append('text').attr('x', W-120).attr('y', H-28).style('font-weight',600).text('Rewrite');
-
-  const groups = [
-    {id:'A', cx: 260, cy: 240, r: 140, fill:'#b7b2d9'},
-    {id:'B', cx: 370, cy: 190, r: 110, fill:'#bda7aa'},
-    {id:'C', cx: 460, cy: 260, r: 130, fill:'#ead991'},
+  const groups=[
+    {cx:260,cy:240,r:140,fill:'#b7b2d9'},
+    {cx:370,cy:190,r:110,fill:'#bda7aa'},
+    {cx:460,cy:260,r:130,fill:'#ead991'}
   ];
-
-  const g = svg.append('g');
-
-  const circles = g.selectAll('circle').data(groups).enter().append('circle')
-    .attr('cx', d=>d.cx).attr('cy', d=>d.cy).attr('r', 0)
-    .attr('fill', d=>d.fill).attr('fill-opacity', .55).attr('stroke', '#666').attr('stroke-opacity', .4);
-
-  circles.transition().duration(900).ease(d3.easeElastic.period(0.5))
-    .attr('r', d=>d.r);
-
-  // hover interaction
-  circles.on('mouseenter', function(e,d){
-      d3.selectAll('#chart-venn circle').attr('fill-opacity', .2);
-      d3.select(this).attr('fill-opacity', .6).attr('stroke-opacity', .9);
-    })
-    .on('mouseleave', function(){
-      d3.selectAll('#chart-venn circle').attr('fill-opacity', .55).attr('stroke-opacity', .4);
-    });
-
-  // Roman numerals
-  const romans = [
-    {t:'I', x:210, y:300}, {t:'II', x:370, y:195}, {t:'III', x:515, y:300},
-    {t:'IV', x:310, y:240}, {t:'V', x:440, y:230}, {t:'VI', x:430, y:280}, {t:'VII', x:400, y:255}
-  ];
-  g.selectAll('text.roman').data(romans).enter().append('text')
-    .attr('class','roman').attr('x',d=>d.x).attr('y',d=>d.y)
-    .attr('text-anchor','middle').style('font-weight',700).style('font-size','16px')
-    .style('opacity',0).text(d=>d.t)
-    .transition().delay(600).duration(600).style('opacity',1);
+  const g=svg.append('g');
+  const circles=g.selectAll('circle').data(groups).enter().append('circle')
+    .attr('cx',d=>d.cx).attr('cy',d=>d.cy).attr('r',0)
+    .attr('fill',d=>d.fill).attr('fill-opacity',.55).attr('stroke','#666').attr('stroke-opacity',.4);
+  circles.transition().duration(900).ease(d3.easeElastic.period(0.5)).attr('r',d=>d.r);
+  circles.on('mouseenter', function(){
+    d3.selectAll('#view-venn circle').attr('fill-opacity',.2);
+    d3.select(this).attr('fill-opacity',.6).attr('stroke-opacity',.9);
+  }).on('mouseleave', function(){
+    d3.selectAll('#view-venn circle').attr('fill-opacity',.55).attr('stroke-opacity',.4);
+  });
+  const romans=[{t:'I',x:210,y:300},{t:'II',x:370,y:195},{t:'III',x:515,y:300},
+                {t:'IV',x:310,y:240},{t:'V',x:440,y:230},{t:'VI',x:430,y:280},{t:'VII',x:400,y:255}];
+  g.selectAll('text.roman').data(romans).enter().append('text').attr('class','roman')
+    .attr('x',d=>d.x).attr('y',d=>d.y).attr('text-anchor','middle').style('font-weight',700).style('font-size','16px')
+    .style('opacity',0).text(d=>d.t).transition().delay(600).duration(600).style('opacity',1);
 })();
 
-// ---------- Chart 3: Optimisation route (segmented with arrow per segment) ----------
-(function route(){
-  const W = 480, H = 360, m = {t:16,r:16,b:16,l:16};
-  const svg = d3.select('#chart-route').append('svg').attr('viewBox', [0,0,W,H]);
-
-  // grid background
-  const grid = svg.append('g').attr('opacity', .6);
-  for(let x= m.l; x<=W-m.r; x+=20){
-    grid.append('line').attr('x1',x).attr('y1',m.t).attr('x2',x).attr('y2',H-m.b).attr('stroke','#d7d7de');
-  }
-  for(let y= m.t; y<=H-m.b; y+=20){
-    grid.append('line').attr('x1',m.l).attr('y1',y).attr('x2',W-m.r).attr('y2',y).attr('stroke','#d7d7de');
-  }
-
-  // small arrow marker
-  const defs = svg.append('defs');
-  defs.append('marker')
-      .attr('id','arrowSmall')
-      .attr('viewBox','0 0 6 6')
-      .attr('refX',6).attr('refY',3)
-      .attr('markerWidth',4).attr('markerHeight',4)
-      .attr('orient','auto-start-reverse')
+// Chart 3 – Route (segmented, arrows, 1.8/2.8)
+(function(){
+  const W=480,H=360,m={t:16,r:16,b:16,l:16};
+  const svg=d3.select('#view-route').append('svg').attr('viewBox',[0,0,W,H]);
+  const grid=svg.append('g').attr('opacity',.6);
+  for(let x=m.l;x<=W-m.r;x+=20){ grid.append('line').attr('x1',x).attr('y1',m.t).attr('x2',x).attr('y2',H-m.b).attr('stroke','#d7d7de'); }
+  for(let y=m.t;y<=H-m.b;y+=20){ grid.append('line').attr('x1',m.l).attr('y1',y).attr('x2',W-m.r).attr('y2',y).attr('stroke','#d7d7de'); }
+  const defs=svg.append('defs');
+  defs.append('marker').attr('id','arrowSmall').attr('viewBox','0 0 6 6')
+      .attr('refX',6).attr('refY',3).attr('markerWidth',4).attr('markerHeight',4).attr('orient','auto-start-reverse')
       .append('path').attr('d','M0,0 L6,3 L0,6 Z').attr('fill','#3d6eda');
-
-  // points (approximate)
-  const points = [
-    [80,300],[100,280],[120,255],[140,235],[160,230],[180,240],
-    [200,250],[220,235],[250,225],[280,230],[310,220],[340,225],[370,235],[400,230]
-  ];
-
-  // background ribbon
-  const ribbon = d3.area()
-    .x(d=>d[0])
-    .y0(d=>d[1]+10)
-    .y1(d=>d[1]-10)
-    .curve(d3.curveCatmullRom.alpha(0.5));
-  svg.append('path').attr('d', ribbon(points)).attr('fill','#b5d0f7').attr('opacity',.4);
-
-  // segmented path with arrow per segment
-  const lineSeg = d3.line().curve(d3.curveCatmullRom.alpha(0.5));
-  const segGroup = svg.append('g').attr('stroke','#3d6eda').attr('fill','none');
+  const points=[[80,300],[100,280],[120,255],[140,235],[160,230],[180,240],
+                [200,250],[220,235],[250,225],[280,230],[310,220],[340,225],[370,235],[400,230]];
+  const ribbon=d3.area().x(d=>d[0]).y0(d=>d[1]+10).y1(d=>d[1]-10).curve(d3.curveCatmullRom.alpha(0.5));
+  svg.append('path').attr('d',ribbon(points)).attr('fill','#b5d0f7').attr('opacity',.4);
+  const lineSeg=d3.line().curve(d3.curveCatmullRom.alpha(0.5));
+  const segGroup=svg.append('g').attr('stroke','#3d6eda').attr('fill','none');
   points.forEach((p,i)=>{
-    if(i < points.length-1){
-      const seg = segGroup.append('path')
-        .attr('d', lineSeg([points[i], points[i+1]]))
-        .attr('stroke-width',1.8)
-        .attr('marker-end','url(#arrowSmall)')
-        .attr('opacity',0);
+    if(i<points.length-1){
+      const seg=segGroup.append('path')
+        .attr('d',lineSeg([points[i],points[i+1]]))
+        .attr('stroke-width',1.8).attr('marker-end','url(#arrowSmall)').attr('opacity',0);
       seg.transition().delay(i*140).duration(520).attr('opacity',1);
     }
   });
-
-  // start/end markers
-  const start = points[0], end = points[points.length-1];
-  svg.append('rect').attr('x', start[0]-6).attr('y', start[1]-6).attr('width',12).attr('height',12).attr('fill','#4463cc');
-  svg.append('text').attr('x', start[0]+10).attr('y', start[1]-8).text('x').style('font-weight',700);
-  svg.append('rect').attr('x', end[0]-6).attr('y', end[1]-6).attr('width',12).attr('height',12).attr('fill','#b84d4d');
-  svg.append('text').attr('x', end[0]+10).attr('y', end[1]-8).text("x'").style('font-weight',700);
-
-  // hover interaction: thicken hovered segment
-  segGroup.selectAll('path')
-    .on('mouseenter', function(){ d3.select(this).attr('stroke-width',2.8); })
-    .on('mouseleave', function(){ d3.select(this).attr('stroke-width',1.8); });
+  const start=points[0], end=points[points.length-1];
+  svg.append('rect').attr('x',start[0]-6).attr('y',start[1]-6).attr('width',12).attr('height',12).attr('fill','#4463cc');
+  svg.append('text').attr('x',start[0]+10).attr('y',start[1]-8).text('x').style('font-weight',700);
+  svg.append('rect').attr('x',end[0]-6).attr('y',end[1]-6).attr('width',12).attr('height',12).attr('fill','#b84d4d');
+  svg.append('text').attr('x',end[0]+10).attr('y',end[1]-8).text("x'").style('font-weight',700);
+  segGroup.selectAll('path').on('mouseenter',function(){ d3.select(this).attr('stroke-width',2.8); })
+                            .on('mouseleave',function(){ d3.select(this).attr('stroke-width',1.8); });
 })();
 
-// ---------- Chart 5: Math plots (ENHANCED) ----------
-(function mathPlots(){
-  const W = 720, H = 360, m = {t:28,r:20,b:44,l:44};
-  const svg = d3.select('#chart-math').append('svg').attr('viewBox',[0,0,W,H]);
-
-  // LEFT bars (with draggable ghost to set target, double-click to apply)
-  const left = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
-  const wL = (W/2)-m.l-m.r, hL = H - m.t - m.b;
-
+// Chart 5 – Math plots (enhanced)
+(function(){
+  const W=720,H=360,m={t:28,r:20,b:44,l:44};
+  const svg=d3.select('#view-math').append('svg').attr('viewBox',[0,0,W,H]);
+  const left=svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+  const wL=(W/2)-m.l-m.r, hL=H-m.t-m.b;
   left.append('line').attr('x1',0).attr('y1',hL).attr('x2',wL).attr('y2',hL).attr('stroke','#222');
   left.append('line').attr('x1',0).attr('y1',hL).attr('x2',0).attr('y2',0).attr('stroke','#222');
+  const xL=d3.scaleBand().domain(['i/n','(i+Δn)/n']).range([40,180]).padding(0.25);
+  const yL=d3.scaleLinear().domain([0,1]).range([hL,20]);
+  const dataL=[{x:'i/n',y:.6,target:.6},{x:'(i+Δn)/n',y:.55,target:.55}];
+  const bars=left.selectAll('rect.bar').data(dataL).enter().append('rect')
+    .attr('class','bar').attr('x',d=>xL(d.x)).attr('width',xL.bandwidth()/1.2)
+    .attr('y',hL).attr('height',0).attr('fill','#bbaedb').attr('opacity',.95)
+    .on('mouseenter',(e,d)=>showTT(`${d.x}: ${d.y.toFixed(2)}`,[e.pageX,e.pageY]))
+    .on('mouseleave',hideTT)
+    .transition().duration(900).attr('y',d=>yL(d.y)).attr('height',d=>hL-yL(d.y));
+  const ghosts=left.selectAll('rect.ghost').data(dataL).enter().append('rect')
+    .attr('class','ghost').attr('x',d=>xL(d.x)).attr('width',xL.bandwidth()/1.2)
+    .attr('y',d=>yL(d.target)).attr('height',d=>hL-yL(d.target))
+    .attr('fill','#bbaedb').attr('stroke','#6d6295').style('cursor','ns-resize');
+  const dragGhost=d3.drag().on('drag',(e,d)=>{
+    const y=Math.max(0,Math.min(1,yL.invert(e.y-m.t)));
+    d.target=y;
+    d3.select(e.sourceEvent.target).attr('y',yL(y)).attr('height',hL-yL(y));
+    showTT(`target(${d.x}) = ${d.target.toFixed(2)} · 双击应用`,[e.sourceEvent.pageX,e.sourceEvent.pageY]);
+  }).on('end',hideTT);
+  ghosts.call(dragGhost).on('dblclick',(e,d)=>{
+    d.y=d.target;
+    bars.filter(b=>b.x===d.x).transition().duration(600).attr('y',yL(d.y)).attr('height',hL-yL(d.y));
+  });
+  left.append('text').attr('x',210).attr('y',yL(.62)).text('→');
+  left.append('text').attr('x',-6).attr('y',18).attr('text-anchor','end').text('(High) p2');
+  left.append('text').attr('x',-6).attr('y',hL-4).attr('text-anchor','end').text('(Low) p1');
 
-  const xL = d3.scaleBand().domain(['i/n','(i+Δn)/n']).range([40, 180]).padding(0.25);
-  const yL = d3.scaleLinear().domain([0, 1]).range([hL, 20]);
-  const dataL = [{x:'i/n', y:.6, target:.6}, {x:'(i+Δn)/n', y:.55, target:.55}];
-
-  const bars = left.selectAll('rect.bar').data(dataL).enter().append('rect')
-    .attr('class','bar').attr('x', d=>xL(d.x)).attr('width', xL.bandwidth()/1.2)
-    .attr('y', hL).attr('height', 0).attr('fill','#bbaedb').attr('opacity',.95)
-    .on('mouseenter', (e,d)=>showTT(`${d.x}: ${d.y.toFixed(2)}`, [e.pageX, e.pageY]))
-    .on('mouseleave', hideTT)
-    .transition().duration(900).attr('y', d=>yL(d.y)).attr('height', d=>hL - yL(d.y));
-
-  const ghosts = left.selectAll('rect.ghost').data(dataL).enter().append('rect')
-    .attr('class','ghost')
-    .attr('x', d=>xL(d.x)).attr('width', xL.bandwidth()/1.2)
-    .attr('y', d=>yL(d.target)).attr('height', d=>hL - yL(d.target))
-    .attr('fill','#bbaedb').attr('stroke','#6d6295')
-    .style('cursor','ns-resize');
-
-  const dragGhost = d3.drag()
-    .on('drag', (e, d)=>{
-      const y = Math.max(0, Math.min(1, yL.invert(e.y - m.t)));
-      d.target = y;
-      d3.select(e.sourceEvent.target)
-        .attr('y', yL(d.target))
-        .attr('height', hL - yL(d.target));
-      showTT(`target(${d.x}) = ${d.target.toFixed(2)} · 双击应用到实心柱`, [e.sourceEvent.pageX, e.sourceEvent.pageY]);
-    })
-    .on('end', hideTT);
-  ghosts.call(dragGhost)
-    .on('dblclick', (e, d)=>{
-      d.y = d.target;
-      bars.filter(b=>b.x===d.x)
-        .transition().duration(600)
-        .attr('y', yL(d.y))
-        .attr('height', hL - yL(d.y));
-    });
-
-  left.append('text').attr('x', 210).attr('y', yL(.62)).text('→');
-  left.append('text').attr('x', -6).attr('y', 18).attr('text-anchor','end').text('(High) p2');
-  left.append('text').attr('x', -6).attr('y', hL-4).attr('text-anchor','end').text('(Low) p1');
-
-  // RIGHT curves with crosshair, dual probes, shaded gap
-  const right = svg.append('g').attr('transform',`translate(${W/2+24},${m.t})`);
-  const wR = W/2 - m.l - m.r - 24, hR = hL;
-
+  const right=svg.append('g').attr('transform',`translate(${W/2+24},${m.t})`);
+  const wR=W/2-m.l-m.r-24, hR=hL;
   right.append('line').attr('x1',0).attr('y1',hR).attr('x2',wR).attr('y2',hR).attr('stroke','#222');
   right.append('line').attr('x1',0).attr('y1',hR).attr('x2',0).attr('y2',0).attr('stroke','#222');
-
-  const xR = d3.scaleLinear().domain([0,1]).range([0,wR]);
-  const yR = d3.scaleLinear().domain([0,50]).range([hR,0]);
-
-  const f1 = x => 35 - 15*x*x;   // solid
-  const f2 = x => 40 - 12*x;     // dashed ref
-
-  const lineGen = d3.line().x(d=>xR(d.x)).y(d=>yR(d.y)).curve(d3.curveMonotoneX);
-  const data1 = d3.range(0, 1.001, 0.01).map(x => ({x, y: f1(x)}));
-  const data2 = d3.range(0, 1.001, 0.01).map(x => ({x, y: f2(x)}));
-
-  const areaGap = d3.area()
-    .x(d=>xR(d.x))
-    .y0(d=>yR(f1(d.x)))
-    .y1(d=>yR(f2(d.x)))
-    .curve(d3.curveMonotoneX);
-  const gap = right.append('path').attr('fill','#cfe9d5').attr('opacity',0.6);
-
-  const curve1 = right.append('path').datum(data1)
-    .attr('fill','none').attr('stroke','#3e9153').attr('stroke-width',2);
-  const len = curve1.node().getTotalLength();
+  const xR=d3.scaleLinear().domain([0,1]).range([0,wR]);
+  const yR=d3.scaleLinear().domain([0,50]).range([hR,0]);
+  const f1=x=>35-15*x*x, f2=x=>40-12*x;
+  const lineGen=d3.line().x(d=>xR(d.x)).y(d=>yR(d.y)).curve(d3.curveMonotoneX);
+  const data1=d3.range(0,1.001,0.01).map(x=>({x,y:f1(x)}));
+  const data2=d3.range(0,1.001,0.01).map(x=>({x,y:f2(x)}));
+  const areaGap=d3.area().x(d=>xR(d.x)).y0(d=>yR(f1(d.x))).y1(d=>yR(f2(d.x))).curve(d3.curveMonotoneX);
+  const gap=right.append('path').attr('fill','#cfe9d5').attr('opacity',0.6);
+  const curve1=right.append('path').datum(data1).attr('fill','none').attr('stroke','#3e9153').attr('stroke-width',2);
+  const len=curve1.node().getTotalLength();
   curve1.attr('stroke-dasharray', `${len} ${len}`).attr('stroke-dashoffset', len)
         .transition().duration(1200).ease(d3.easeCubic).attr('stroke-dashoffset', 0);
-  curve1.attr('d', lineGen);
-
-  right.append('path').datum(data2)
-    .attr('fill','none').attr('stroke','#90c79b').attr('stroke-width',2).style('opacity',.6)
-    .attr('stroke-dasharray','6 6')
-    .attr('d', lineGen);
-
-  const vline = right.append('line').attr('y1',0).attr('y2',hR).attr('stroke','#666').attr('stroke-dasharray','4 4').style('opacity',0);
-  const probe1 = right.append('circle').attr('r',4).attr('fill','#3e9153').style('opacity',0);
-  const probe2 = right.append('circle').attr('r',4).attr('fill','#90c79b').style('opacity',0);
-
-  right.append('rect').attr('width', wR).attr('height', hR).attr('fill','transparent')
-    .on('mousemove', (e)=>{
-      const [mx] = d3.pointer(e);
-      const x = Math.max(0, Math.min(1, xR.invert(mx)));
-      const y1 = f1(x), y2 = f2(x);
-      vline.attr('x1', xR(x)).attr('x2', xR(x)).style('opacity',1);
-      probe1.attr('cx', xR(x)).attr('cy', yR(y1)).style('opacity',1);
-      probe2.attr('cx', xR(x)).attr('cy', yR(y2)).style('opacity',1);
-      const step = 0.01;
-      const partial = d3.range(0, x+1e-6, step).map(t=>({x:t}));
-      gap.attr('d', areaGap(partial));
-      showTT(`x=${x.toFixed(2)} · y₁=${y1.toFixed(2)} · y₂=${y2.toFixed(2)} · Δ=${(y2-y1).toFixed(2)}`, [e.pageX, e.pageY]);
+  curve1.attr('d',lineGen);
+  right.append('path').datum(data2).attr('fill','none').attr('stroke','#90c79b').attr('stroke-width',2).style('opacity',.6)
+    .attr('stroke-dasharray','6 6').attr('d',lineGen);
+  const vline=right.append('line').attr('y1',0).attr('y2',hR).attr('stroke','#666').attr('stroke-dasharray','4 4').style('opacity',0);
+  const probe1=right.append('circle').attr('r',4).attr('fill','#3e9153').style('opacity',0);
+  const probe2=right.append('circle').attr('r',4).attr('fill','#90c79b').style('opacity',0);
+  right.append('rect').attr('width',wR).attr('height',hR).attr('fill','transparent')
+    .on('mousemove',(e)=>{
+      const [mx]=d3.pointer(e); const x=Math.max(0,Math.min(1,xR.invert(mx)));
+      const y1=f1(x), y2=f2(x);
+      vline.attr('x1',xR(x)).attr('x2',xR(x)).style('opacity',1);
+      probe1.attr('cx',xR(x)).attr('cy',yR(y1)).style('opacity',1);
+      probe2.attr('cx',xR(x)).attr('cy',yR(y2)).style('opacity',1);
+      const part=d3.range(0,x+1e-6,0.01).map(t=>({x:t})); gap.attr('d',areaGap(part));
+      showTT(`x=${x.toFixed(2)} · y₁=${y1.toFixed(2)} · y₂=${y2.toFixed(2)} · Δ=${(y2-y1).toFixed(2)}`,[e.pageX,e.pageY]);
     })
-    .on('mouseleave', ()=>{
-      vline.style('opacity',0); probe1.style('opacity',0); probe2.style('opacity',0);
-      gap.attr('d', '');
-      hideTT();
-    })
-    .on('click', (e)=>{
-      const [mx] = d3.pointer(e);
-      const x = Math.max(0, Math.min(1, xR.invert(mx)));
-      right.append('circle').attr('r',3).attr('cx', xR(x)).attr('cy', yR(f1(x)))
-           .attr('fill','#3e9153').attr('opacity',0.9);
+    .on('mouseleave',()=>{ vline.style('opacity',0); probe1.style('opacity',0); probe2.style('opacity',0); gap.attr('d',''); hideTT(); })
+    .on('click',(e)=>{
+      const [mx]=d3.pointer(e); const x=Math.max(0,Math.min(1,xR.invert(mx)));
+      right.append('circle').attr('r',3).attr('cx',xR(x)).attr('cy',yR(f1(x))).attr('fill','#3e9153').attr('opacity',0.9);
     });
-
-  right.append('text').attr('x', wR/2).attr('y', hR+30).attr('text-anchor','middle').text('position');
 })();
 
-// ---------- Chart 8: Simple bars ----------
-(function bars(){
-  const data = [
-    {model:'BERT', val:74.4, ghost:64.8},
-    {model:'RoBERTa', val:81.9, ghost:65.5},
-    {model:'BART', val:73.1, ghost:63.5}
-  ];
-
-  const W = 720, H = 360, m = {t:40,r:20,b:60,l:44};
-  const svg = d3.select('#chart-bars').append('svg').attr('viewBox',[0,0,W,H]);
-  svg.append('text').attr('x', W/2).attr('y', 24).attr('text-anchor','middle').style('font-weight',700)
-     .text('Cross Validation Accuracy (%)');
-
-  const x = d3.scaleBand().domain(data.map(d=>d.model)).range([m.l, W-m.r]).padding(0.35);
-  const y = d3.scaleLinear().domain([0,100]).nice().range([H-m.b, m.t]);
-
-  const axisY = d3.axisLeft(y).ticks(5);
-  const axisX = d3.axisBottom(x);
-  svg.append('g').attr('transform',`translate(${m.l-4},0)`).attr('class','axis').call(axisY);
-  svg.append('g').attr('transform',`translate(0,${H-m.b})`).attr('class','axis').call(axisX);
-
-  const g = svg.append('g');
-  g.selectAll('rect.bar').data(data).enter().append('rect')
-    .attr('class','bar')
-    .attr('x', d=>x(d.model)).attr('width', x.bandwidth()/1.4)
-    .attr('y', H-m.b).attr('height',0).attr('fill','#e8c467')
-    .on('mouseenter', function(e,d){
-      d3.select(this).attr('fill','#d3a93f');
-      showTT(`${d.model}: ${d.val.toFixed(1)}%`, [e.pageX, e.pageY]);
-    }).on('mouseleave', function(){ d3.select(this).attr('fill','#e8c467'); hideTT(); })
-    .transition().duration(900).attr('y', d=>y(d.val)).attr('height', d=>H-m.b - y(d.val));
-
-  g.selectAll('rect.ghost').data(data).enter().append('rect')
-    .attr('class','ghost')
-    .attr('x', d=>x(d.model)+x.bandwidth()/1.6).attr('width', x.bandwidth()/1.6)
-    .attr('y', d=>y(d.ghost)).attr('height', d=>H-m.b - y(d.ghost))
-    .attr('fill','#e8c467').attr('stroke','#a68b34');
-
-  g.selectAll('text.lbl').data(data).enter().append('text')
-    .attr('class','lbl').attr('x', d=>x(d.model)+x.bandwidth()/2.8).attr('y', d=>y(d.val)-6)
-    .attr('text-anchor','middle').style('font-weight',700).text(d=>d.val);
+// Chart 8 – Bars
+(function(){
+  const data=[{model:'BERT',val:74.4,ghost:64.8},{model:'RoBERTa',val:81.9,ghost:65.5},{model:'BART',val:73.1,ghost:63.5}];
+  const W=720,H=360,m={t:40,r:20,b:60,l:44};
+  const svg=d3.select('#view-bars').append('svg').attr('viewBox',[0,0,W,H]);
+  svg.append('text').attr('x',W/2).attr('y',24).attr('text-anchor','middle').style('font-weight',700).text('Cross Validation Accuracy (%)');
+  const x=d3.scaleBand().domain(data.map(d=>d.model)).range([m.l, W-m.r]).padding(0.35);
+  const y=d3.scaleLinear().domain([0,100]).nice().range([H-m.b,m.t]);
+  svg.append('g').attr('transform',`translate(${m.l-4},0)`).call(d3.axisLeft(y).ticks(5));
+  svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x));
+  const g=svg.append('g');
+  g.selectAll('rect.bar').data(data).enter().append('rect').attr('class','bar')
+    .attr('x',d=>x(d.model)).attr('width',x.bandwidth()/1.4)
+    .attr('y',H-m.b).attr('height',0).attr('fill','#e8c467')
+    .on('mouseenter',function(e,d){ d3.select(this).attr('fill','#d3a93f'); showTT(`${d.model}: ${d.val.toFixed(1)}%`,[e.pageX,e.pageY]); })
+    .on('mouseleave',function(){ d3.select(this).attr('fill','#e8c467'); hideTT(); })
+    .transition().duration(900).attr('y',d=>y(d.val)).attr('height',d=>H-m.b-y(d.val));
+  g.selectAll('rect.ghost').data(data).enter().append('rect').attr('class','ghost')
+    .attr('x',d=>x(d.model)+x.bandwidth()/1.6).attr('width',x.bandwidth()/1.6)
+    .attr('y',d=>y(d.ghost)).attr('height',d=>H-m.b-y(d.ghost)).attr('fill','#e8c467').attr('stroke','#a68b34');
+  g.selectAll('text.lbl').data(data).enter().append('text').attr('class','lbl')
+    .attr('x',d=>x(d.model)+x.bandwidth()/2.8).attr('y',d=>y(d.val)-6).attr('text-anchor','middle').style('font-weight',700).text(d=>d.val);
 })();
 
-// ---------- Chart 10: Map ----------
-(function mapChart(){
-  const W = 640, H = 460, m = {t:12,r:12,b:12,l:12};
-  const svg = d3.select('#chart-map').append('svg').attr('viewBox',[0,0,W,H]);
-
-  // grid
-  const grid = svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
-  const gw = W - m.l - m.r, gh = H - m.t - m.b;
-  for(let x=0; x<=gw; x+=20){ grid.append('line').attr('x1',x).attr('y1',0).attr('x2',x).attr('y2',gh).attr('stroke','#d7d7de'); }
-  for(let y=0; y<=gh; y+=20){ grid.append('line').attr('x1',0).attr('y1',y).attr('x2',gw).attr('y2',y).attr('stroke','#d7d7de'); }
+// Chart 10 – Map
+(function(){
+  const W=640,H=460,m={t:12,r:12,b:12,l:12};
+  const svg=d3.select('#view-map').append('svg').attr('viewBox',[0,0,W,H]);
+  const grid=svg.append('g').attr('transform',`translate(${m.l},${m.t})`);
+  const gw=W-m.l-m.r, gh=H-m.t-m.b;
+  for(let x=0;x<=gw;x+=20){ grid.append('line').attr('x1',x).attr('y1',0).attr('x2',x).attr('y2',gh).attr('stroke','#d7d7de'); }
+  for(let y=0;y<=gh;y+=20){ grid.append('line').attr('x1',0).attr('y1',y).attr('x2',gw).attr('y2',y).attr('stroke','#d7d7de'); }
   svg.append('rect').attr('x',m.l).attr('y',m.t).attr('width',gw).attr('height',gh).attr('fill','none').attr('stroke','#bbb').attr('stroke-width',2);
-
-  // toy "map" polygons (replaceable with GeoJSON + d3-geo)
-  const polySets = [
+  const polySets=[
     [[40,40],[80,20],[90,50],[70,120],[40,140],[18,120]],
     [[120,180],[220,170],[260,190],[230,220],[160,210]],
     [[180,120],[220,130],[210,150],[170,145]],
@@ -378,48 +408,20 @@ function hideTT(){ tt.style('opacity', 0); }
     [[320,70],[380,60],[420,80],[380,95]],
     [[420,220],[460,240],[440,260],[410,245]]
   ];
-  const land = svg.append('g').attr('transform',`translate(${m.l},${m.t})`).attr('opacity',0);
-  polySets.forEach(p => {
-    land.append('path').attr('d', d3.line()(p) + 'Z').attr('fill','#e9cf8f').attr('stroke','#c7b07a');
-  });
+  const land=svg.append('g').attr('transform',`translate(${m.l},${m.t})`).attr('opacity',0);
+  polySets.forEach(p=>{ land.append('path').attr('d',d3.line()(p)+'Z').attr('fill','#e9cf8f').attr('stroke','#c7b07a'); });
   land.transition().duration(800).attr('opacity',1);
-
-  // big circle (search radius), draggable and wheel-zoomable
-  const circle = svg.append('circle')
-    .attr('cx', m.l + 260).attr('cy', m.t + 210).attr('r', 150)
-    .attr('fill','none').attr('stroke','#903c3c').attr('stroke-width',5).attr('opacity',.9);
-
-  const drag = d3.drag().on('drag', (e)=>{
-    circle.attr('cx', e.x).attr('cy', e.y);
-    updateLabels();
-  });
+  const circle=svg.append('circle').attr('cx',m.l+260).attr('cy',m.t+210).attr('r',150).attr('fill','none').attr('stroke','#903c3c').attr('stroke-width',5).attr('opacity',.9);
+  const drag=d3.drag().on('drag',(e)=>{ circle.attr('cx',e.x).attr('cy',e.y); updateLabels(); });
   circle.call(drag);
-
-  svg.on('wheel', (e)=>{
-    e.preventDefault();
-    const r = Math.max(30, Math.min(220, (+circle.attr('r')) + (e.deltaY>0? -10: 10)));
-    circle.attr('r', r);
-    updateLabels();
-  }, {passive:false});
-
-  // x' and B(x') labels
-  const markStart = svg.append('rect').attr('width',12).attr('height',12).attr('fill','#e0a532');
-  const lblX = svg.append('text').style('font-weight',700).style('fill','#12346b');
-  const lblB = svg.append('text').style('font-weight',700).style('fill','#12346b');
-  function updateLabels(){
-    const cx = +circle.attr('cx'), cy = +circle.attr('cy'), r = +circle.attr('r');
-    markStart.attr('x', cx-6).attr('y', cy-6);
-    lblX.attr('x', cx+8).attr('y', cy-6).text("x'");
-    lblB.attr('x', cx-r+8).attr('y', cy+r-6).text("B(x')");
-  }
+  svg.on('wheel',(e)=>{ e.preventDefault(); const r=Math.max(30,Math.min(220,(+circle.attr('r'))+(e.deltaY>0?-10:10))); circle.attr('r',r); updateLabels(); },{passive:false});
+  const markStart=svg.append('rect').attr('width',12).attr('height',12).attr('fill','#e0a532');
+  const lblX=svg.append('text').style('font-weight',700).style('fill','#12346b');
+  const lblB=svg.append('text').style('font-weight',700).style('fill','#12346b');
+  function updateLabels(){ const cx=+circle.attr('cx'), cy=+circle.attr('cy'), r=+circle.attr('r'); markStart.attr('x',cx-6).attr('y',cy-6); lblX.attr('x',cx+8).attr('y',cy-6).text("x'"); lblB.attr('x',cx-r+8).attr('y',cy+r-6).text("B(x')"); }
   updateLabels();
-
-  svg.on('mousemove', (e)=>{
-    const cx = +circle.attr('cx'), cy = +circle.attr('cy'), r = +circle.attr('r');
-    showTT(`center=(${Math.round(cx)}, ${Math.round(cy)}), r=${Math.round(r)}`, [e.pageX, e.pageY]);
-  }).on('mouseleave', hideTT);
+  svg.on('mousemove',(e)=>{ const cx=+circle.attr('cx'), cy=+circle.attr('cy'), r=+circle.attr('r'); showTT(`center=(${Math.round(cx)}, ${Math.round(cy)}), r=${Math.round(r)}`,[e.pageX,e.pageY]); }).on('mouseleave',hideTT);
 })();
 </script>
-
 </body>
 </html>
